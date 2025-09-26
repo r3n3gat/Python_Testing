@@ -11,3 +11,7 @@ __pycache__/
 .env
 reports/
 *.csv
+
+.coverage
+
+REPORT_PERF.md
