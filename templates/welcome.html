@@ -5,6 +5,21 @@
     <title>Summary | GUDLFT Registration</title>
 </head>
 <body>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Optionnel: un peu de style pour la lisibilité -->
+  <style>
+    .flashes { list-style: none; padding: 0; }
+    .flashes li { background: #fff3cd; border: 1px solid #ffeeba; padding: .5rem .75rem; margin: .5rem 0; }
+  </style>
         <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
 
     {% with messages = get_flashed_messages()%}
