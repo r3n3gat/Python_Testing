@@ -5,3 +5,13 @@ lib
 tests/
 .envrc
 __pycache__
+.venv/
+__pycache__/
+*.pyc
+.env
+reports/
+*.csv
+
+.coverage
+
+REPORT_PERF.md
