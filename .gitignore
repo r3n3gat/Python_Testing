@@ -1,17 +1,23 @@
-bin
-include
-lib
-.Python
-tests/
-.envrc
-__pycache__
-.venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 .env
-reports/
-*.csv
-
+.env.*
+*.env
+.venv/
+venv/
+env/
+.pytest_cache/
 .coverage
+htmlcov/
 
-REPORT_PERF.md
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Builds
+dist/
+build/

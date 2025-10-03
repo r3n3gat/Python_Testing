@@ -1,21 +1,24 @@
 <!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8"/>
-    <title>Points par club</title>
-  </head>
-  <body>
-    <h2>Points par club</h2>
-    <ul>
-      {% for c in clubs %}
-        <li>{{ c.name }} : {{ c.points }} points</li>
-      {% endfor %}
-    </ul>
-    <p><a href="{{ url_for('index') }}">Retour</a></p>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Points des clubs</title>
   <style>
-  .flashes { list-style: none; padding: 0; }
-  .flashes li { background: #fff3cd; border: 1px solid #ffeeba; padding: .5rem .75rem; margin: .5rem 0; }
-</style>
-
-  </body>
+    table { border-collapse: collapse }
+    th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left }
+  </style>
+</head>
+<body>
+  <h1>Points des clubs</h1>
+  <table>
+    <thead>
+      <tr><th>Club</th><th>Points</th></tr>
+    </thead>
+    <tbody>
+      {% for c in clubs %}
+      <tr><td>{{ c.name }}</td><td>{{ c.points }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
 </html>
