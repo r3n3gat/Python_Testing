@@ -245,4 +245,4 @@ Licence
 Ce projet est fourni à des fins pédagogiques (OpenClassrooms P11).
 Adapter la licence selon votre besoin (MIT recommandé pour un dépôt public).
 
-Auteur : @r3n3gat — Contributions, PR & issues bienvenues ✨
+Auteur : @r3n3gat — Contributions, PR & issues bienvenues
