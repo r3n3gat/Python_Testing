@@ -91,11 +91,12 @@ def showSummary():
     email_input = (request.form.get("email") or "").strip()
     club = next((c for c in clubs if c.get("email") == email_input), None)
     if not club:
+        flash("Adresse mail inconnue")
         flash("Email inconnu")
         return redirect(url_for("index"))
-    # mémoriser le club connecté en session (sert aux tests 'club-reservation' & >12 cumulative)
     session["club_email"] = club["email"].lower()
     return render_template("welcome.html", club=club, competitions=competitions)
+
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
