@@ -5,7 +5,6 @@
     <title>Booking for {{competition['name']}} || GUDLFT</title>
 </head>
 <body>
-
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class="flashes">
@@ -21,7 +20,7 @@
     <form action="/purchasePlaces" method="post">
         <input type="hidden" name="club" value="{{club['name']}}">
         <input type="hidden" name="competition" value="{{competition['name']}}">
-        <label for="places">How many places?</label><input type="number" name="places" id=""/>
+        <input type="number" name="places" min="1" max="12" required>
         <button type="submit">Book</button>
     </form>
 <style>
