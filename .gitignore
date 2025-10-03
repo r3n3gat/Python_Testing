@@ -1,8 +1,23 @@
-bin
-include
-lib
-.Python
-tests/
-.envrc
-__pycache__
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.env
+.env.*
+*.env
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.vscode/
 .idea/
+.DS_Store
+
+# Builds
+dist/
+build/
