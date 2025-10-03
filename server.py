@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
 
+# ---------- Data loading ----------
 def loadClubs():
     with open("clubs.json", "r", encoding="utf-8") as c:
         return json.load(c)["clubs"]
