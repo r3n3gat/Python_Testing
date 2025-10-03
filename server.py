@@ -1,7 +1,7 @@
 # server.py
 import json
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, flash, url_for, session
+from flask import Flask, render_template, request, redirect, flash, url_for
 
 # ---------- Data loading ----------
 def loadClubs():
@@ -13,9 +13,8 @@ def loadCompetitions():
         return json.load(comps)["competitions"]
 
 app = Flask(__name__)
-app.secret_key = "something_secret_for_flash"  # NOTE: en prod, utiliser une variable d'env
+app.secret_key = "something_secret_for_flash"  # en prod: variable d'env
 
-# Données en mémoire (réinitialisées dans les tests via conftest)
 clubs = loadClubs()
 competitions = loadCompetitions()
 
@@ -23,21 +22,14 @@ competitions = loadCompetitions()
 # clé: (club_name, comp_name) -> int
 club_bookings = {}
 
-
-# ---------- Helpers ----------
 def find_club_by_name(name):
-    return next((c for c in clubs if c.get("name") == name), None)
-
-def find_club_by_email(email_value):
-    if not email_value:
-        return None
-    return next((c for c in clubs if c.get("email", "").lower() == email_value.lower()), None)
+    return next((c for c in clubs if c["name"] == name), None)
 
 def find_comp_by_name(name):
-    return next((c for c in competitions if c.get("name") == name), None)
+    return next((c for c in competitions if c["name"] == name), None)
 
 def competition_in_past(competition) -> bool:
-    """True si la compétition est passée. Tolérant aux dates mal formées."""
+    """Retourne True si la compétition est passée (tolérant aux dates mal formées)."""
     try:
         comp_dt = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
         return comp_dt < datetime.now()
@@ -49,9 +41,9 @@ def validate_purchase(club, competition, places_required, current_booked=0):
     Règles:
       - compétition non passée
       - places_required entier > 0
-      - places_required <= places restantes
-      - points du club >= places_required
-      - plafond 12 (cumul par club/compétition)
+      - places_required <= places restantes de la compétition
+      - points du club >= places_required (1 point = 1 place)
+      - plafond 12 par club et par compétition (cumulé)
     """
     # 1) compétition non passée
     if competition_in_past(competition):
@@ -75,32 +67,25 @@ def validate_purchase(club, competition, places_required, current_booked=0):
     if n > club_pts:
         return False, "Pas assez de points"
 
-    # 5) plafond 12 cumulé
+    # 5) plafond 12 (cumul par club/compétition)
     if current_booked + n > 12:
         return False, "Maximum 12 places par club sur une compétition"
 
     return True, None
 
-
-# ---------- Routes ----------
 @app.route("/")
 def index():
-    # index doit afficher les messages flash ("Email inconnu", etc.)
     return render_template("index.html")
-
 
 @app.route("/showSummary", methods=["POST"])
 def showSummary():
-    # nom explicite pour éviter toute confusion
-    email_input = (request.form.get("email") or "").strip()
-    club = next((c for c in clubs if c.get("email") == email_input), None)
+    # éviter toute ambiguïté avec le nom 'email'
+    email_input = request.form.get("email", "")
+    club = next((c for c in clubs if c["email"] == email_input), None)
     if not club:
         flash("Email inconnu")
         return redirect(url_for("index"))
-    # ✅ mémoriser le club connecté en session
-    session["club_email"] = club["email"].lower()
     return render_template("welcome.html", club=club, competitions=competitions)
-
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
@@ -111,28 +96,24 @@ def book(competition, club):
         return redirect(url_for("index"))
     return render_template("booking.html", club=foundClub, competition=foundCompetition)
 
-
 @app.route("/purchasePlaces", methods=["POST"])
 def purchasePlaces():
     comp_name = request.form.get("competition")
+    club_name = request.form.get("club")
     places_str = request.form.get("places", "0")
 
-    # ✅ récupérer le club depuis la session (le formulaire peut ne pas l'envoyer)
-    club_email = session.get("club_email")
-    club = find_club_by_email(club_email)
-
-    competition = find_comp_by_name(comp_name) if comp_name else None
+    competition = find_comp_by_name(comp_name)
+    club = find_club_by_name(club_name)
 
     if not competition or not club:
-        # Le test cherche le mot "invalides" dans le message d'erreur
-        flash("Données invalides (club/compétition invalides)")
+        flash("Données invalides (club/compétition)")
         return redirect(url_for("index"))
 
     booked = club_bookings.get((club["name"], competition["name"]), 0)
+
     ok, msg = validate_purchase(club, competition, places_str, current_booked=booked)
     if not ok:
         flash(msg)
-        # On reste sur la page du club (welcome), status 200 attendu par les tests
         return render_template("welcome.html", club=club, competitions=competitions)
 
     n = int(places_str)
@@ -141,7 +122,6 @@ def purchasePlaces():
     new_places = int(competition["numberOfPlaces"]) - n
     new_points = int(club["points"]) - n
     if new_places < 0 or new_points < 0:
-        # sauvegarde défensive (ne devrait pas arriver si la validation est OK)
         flash("Erreur de calcul des points/places")
         return render_template("welcome.html", club=club, competitions=competitions)
 
@@ -149,18 +129,14 @@ def purchasePlaces():
     club["points"] = str(new_points)
     club_bookings[(club["name"], competition["name"])] = booked + n
 
-    # texte exact attendu par les tests
-    flash("Great-booking complete!")
+    flash("Great-booking complete!")  # texte attendu par les tests
     return render_template("welcome.html", club=club, competitions=competitions)
 
-
+# affichage public des points (HTML)
 @app.route("/points")
 def points():
-    # tableau public (pas de login requis)
     return render_template("points.html", clubs=clubs)
-
 
 @app.route("/logout")
 def logout():
-    session.clear()
     return redirect(url_for("index"))
